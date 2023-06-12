@@ -16,6 +16,7 @@ import torch.utils.data
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from math import sqrt
+from tqdm import tqdm
 import datetime
 import argparse
 import os
@@ -87,7 +88,7 @@ class GraphRec(nn.Module):
 def train(model, device, train_loader, optimizer, epoch, best_rmse, best_mae):
     model.train()
     running_loss = 0.0
-    for i, data in enumerate(train_loader, 0):
+    for i, data in tqdm(enumerate(train_loader, 0)):
         batch_nodes_u, batch_nodes_v, labels_list = data
         optimizer.zero_grad()
         loss = model.loss(batch_nodes_u.to(device), batch_nodes_v.to(device), labels_list.to(device))
@@ -95,7 +96,7 @@ def train(model, device, train_loader, optimizer, epoch, best_rmse, best_mae):
         optimizer.step()
         running_loss += loss.item()
         if i % 100 == 0:
-            print('[%d, %5d] loss: %.3f, The best rmse/mae: %.6f / %.6f' % (
+            print(device, '[%d, %5d] loss: %.3f, The best rmse/mae: %.6f / %.6f' % (
                 epoch, i, running_loss / 100, best_rmse, best_mae))
             running_loss = 0.0
     return 0
@@ -132,7 +133,8 @@ def main():
     use_cuda = False
     if torch.cuda.is_available():
         use_cuda = True
-    device = torch.device("cuda" if use_cuda else "cpu")
+    # device = torch.device("cuda" if use_cuda else "cpu")
+    device = torch.device("mps")
 
     embed_dim = args.embed_dim
     dir_data = './data/toy_dataset'
