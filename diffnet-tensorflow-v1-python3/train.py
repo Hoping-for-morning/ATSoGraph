@@ -64,6 +64,7 @@ def start(conf, data, model, evaluate):
         tmp_train_loss = []
         t0 = time()
 
+        """退出训练"""
         while d_train.terminal_flag:
             d_train.getTrainRankingBatch()
             d_train.linkedMap()
@@ -94,6 +95,7 @@ def start(conf, data, model, evaluate):
         test_loss = sess.run(model.map_dict['out']['test'], feed_dict=test_feed_dict)
         t2 = time()
 
+        """性能评估使用 HR 命中率，NDCG(normalized discounted cumulative gain) 归一化折损累计增益"""
         # start evaluate model performance, hr and ndcg
         def getPositivePredictions():
             d_test_eva.getEvaPositiveBatch()
@@ -107,6 +109,7 @@ def start(conf, data, model, evaluate):
             )
             return positive_predictions
 
+        """每个 epoch 训练之后，为训练数据生成负样本，以更新模型并提高性能"""
         def getNegativePredictions():
             negative_predictions = {}
             terminal_flag = 1

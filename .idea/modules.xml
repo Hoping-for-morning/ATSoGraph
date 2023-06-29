@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/GraphRec.iml" filepath="$PROJECT_DIR$/.idea/GraphRec.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ATSoGraph.iml" filepath="$PROJECT_DIR$/.idea/ATSoGraph.iml" />
     </modules>
   </component>
 </project>
