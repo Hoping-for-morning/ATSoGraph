@@ -2,24 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af377f16-5eee-4d04-ae58-a7c190251589" name="Changes" comment="diffnet based on gcn FC recommendation system">
-      <change afterPath="$PROJECT_DIR$/CIFAR10/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CIFAR10/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CIFAR10/preact_resnet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CIFAR10/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CIFAR10/train_fgsm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CIFAR10/train_free.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CIFAR10/train_pgd.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CIFAR10/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ATSoGraph.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/GraphRec.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3/conf/yelp_diffnet.ini" beforeDir="false" afterPath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3/conf/yelp_diffnet.ini" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -280,7 +264,7 @@
       <workItem from="1688041236700" duration="29000" />
       <workItem from="1688041301882" duration="310000" />
       <workItem from="1688041667678" duration="11000" />
-      <workItem from="1688041700877" duration="1949000" />
+      <workItem from="1688041700877" duration="2575000" />
     </task>
     <task id="LOCAL-00001" summary="GCN core function in numpy">
       <created>1687095780238</created>
