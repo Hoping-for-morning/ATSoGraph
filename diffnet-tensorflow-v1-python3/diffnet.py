@@ -1,15 +1,12 @@
-'''
-    author: Peijie Sun
-    e-mail: sun.hfut@gmail.com 
-    released date: 04/18/2019
-'''
+""" diffnet.py 定义网络结构"""
 
-# 使用 tensorflow v1
-
+# use tensorflow v1
 import tensorflow._api.v2.compat.v1 as tf
+
 tf.disable_v2_behavior()
 
 import numpy as np
+
 
 class diffnet():
     def __init__(self, conf):
@@ -25,6 +22,7 @@ class diffnet():
         self.saveVariables()
         self.defineMap()
 
+    # 输入和构造稀疏矩阵
     def inputSupply(self, data_dict):
         self.social_neighbors_indices_input = data_dict['SOCIAL_NEIGHBORS_INDICES_INPUT']
         self.social_neighbors_values_input = data_dict['SOCIAL_NEIGHBORS_VALUES_INPUT']
@@ -37,36 +35,55 @@ class diffnet():
         self.consumed_items_dense_shape = np.array([self.conf.num_users, self.conf.num_items]).astype(np.int64)
 
         self.social_neighbors_sparse_matrix = tf.compat.v1.SparseTensor(
-            indices = self.social_neighbors_indices_input, 
-            values = self.social_neighbors_values_input,
+            indices=self.social_neighbors_indices_input,
+            values=self.social_neighbors_values_input,
             dense_shape=self.social_neighbors_dense_shape
         )
         self.consumed_items_sparse_matrix = tf.compat.v1.SparseTensor(
-            indices = self.consumed_items_indices_input, 
-            values = self.consumed_items_values_input,
+            indices=self.consumed_items_indices_input,
+            values=self.consumed_items_values_input,
             dense_shape=self.consumed_items_dense_shape
         )
+
+    """转换和嵌入生成"""
+    # Conversion and Embedding Generation
+    """基于均值和方差对输入x的分布进行归一化来转换该分布"""
 
     def convertDistribution(self, x):
         mean, var = tf.compat.v1.nn.moments(x, axes=[0, 1])
         y = (x - mean) * 0.2 / tf.compat.v1.sqrt(var)
         return y
 
+    """使用稀疏矩阵乘法计算来自社交邻居的用户嵌入"""
+
     def generateUserEmbeddingFromSocialNeighbors(self, current_user_embedding):
         user_embedding_from_social_neighbors = tf.compat.v1.sparse_tensor_dense_matmul(
             self.social_neighbors_sparse_matrix, current_user_embedding
         )
         return user_embedding_from_social_neighbors
-    
+
+    """使用稀疏矩阵乘法计算消费项目的用户嵌入"""
+
     def generateUserEmebddingFromConsumedItems(self, current_item_embedding):
         user_embedding_from_consumed_items = tf.compat.v1.sparse_tensor_dense_matmul(
             self.consumed_items_sparse_matrix, current_item_embedding
         )
         return user_embedding_from_consumed_items
 
+    """
+    初始化节点
+    包括：
+    item_input
+    user_input
+    label_input
+    the embedding of user and item
+    review_vector_matrix 评审向量矩阵 代表了 feature embedding 的表示
+    fusion_layer 融合层
+    """
+
     def initializeNodes(self):
-        self.item_input = tf.compat.v1.placeholder("int32", [None, 1]) # Get item embedding from the core_item_input
-        self.user_input = tf.compat.v1.placeholder("int32", [None, 1]) # Get user embedding from the core_user_input
+        self.item_input = tf.compat.v1.placeholder("int32", [None, 1])  # Get item embedding from the core_item_input
+        self.user_input = tf.compat.v1.placeholder("int32", [None, 1])  # Get user embedding from the core_user_input
         self.labels_input = tf.compat.v1.placeholder("float32", [None, 1])
 
         self.user_embedding = tf.compat.v1.Variable(
@@ -74,65 +91,77 @@ class diffnet():
         self.item_embedding = tf.compat.v1.Variable(
             tf.compat.v1.random_normal([self.conf.num_items, self.conf.dimension], stddev=0.01), name='item_embedding')
 
-        self.user_review_vector_matrix = tf.compat.v1.constant(\
+        self.user_review_vector_matrix = tf.compat.v1.constant( \
             np.load(self.conf.user_review_vector_matrix), dtype=tf.compat.v1.float32)
-        self.item_review_vector_matrix = tf.compat.v1.constant(\
+        self.item_review_vector_matrix = tf.compat.v1.constant( \
             np.load(self.conf.item_review_vector_matrix), dtype=tf.compat.v1.float32)
-        self.reduce_dimension_layer = tf.compat.v1.layers.Dense(\
+        self.reduce_dimension_layer = tf.compat.v1.layers.Dense( \
             self.conf.dimension, activation=tf.compat.v1.nn.sigmoid, name='reduce_dimension_layer')
 
-        self.item_fusion_layer = tf.compat.v1.layers.Dense(\
+        self.item_fusion_layer = tf.compat.v1.layers.Dense( \
             self.conf.dimension, activation=tf.compat.v1.nn.sigmoid, name='item_fusion_layer')
-        self.user_fusion_layer = tf.compat.v1.layers.Dense(\
+        self.user_fusion_layer = tf.compat.v1.layers.Dense( \
             self.conf.dimension, activation=tf.compat.v1.nn.sigmoid, name='user_fusion_layer')
 
+    """构造训练图"""
+
     def constructTrainGraph(self):
+        """通过转换分布，降维的方式，映射原来的 review matrix"""
         # handle review information, map the origin review into the new space and 
         first_user_review_vector_matrix = self.convertDistribution(self.user_review_vector_matrix)
         first_item_review_vector_matrix = self.convertDistribution(self.item_review_vector_matrix)
-        
+
         self.user_reduce_dim_vector_matrix = self.reduce_dimension_layer(first_user_review_vector_matrix)
         self.item_reduce_dim_vector_matrix = self.reduce_dimension_layer(first_item_review_vector_matrix)
 
         second_user_review_vector_matrix = self.convertDistribution(self.user_reduce_dim_vector_matrix)
         second_item_review_vector_matrix = self.convertDistribution(self.item_reduce_dim_vector_matrix)
 
+        """项目嵌入是通过将 item embedding 和 item_review_vector_matrix 进行融合来计算的"""
         # compute item embedding
-        #self.fusion_item_embedding = self.item_fusion_layer(\
+        # self.fusion_item_embedding = self.item_fusion_layer(\
         #   tf.compat.v1.concat([self.item_embedding, second_item_review_vector_matrix], 1))
         self.final_item_embedding = self.fusion_item_embedding \
-                             = self.item_embedding + second_item_review_vector_matrix
-        #self.final_item_embedding = self.fusion_item_embedding = second_item_review_vector_matrix
+            = self.item_embedding + second_item_review_vector_matrix
+        # self.final_item_embedding = self.fusion_item_embedding = second_item_review_vector_matrix
 
+        """计算 user embedding"""
         # compute user embedding
+        """user embeding 由两轮图卷积运算从社交邻居生成"""
         user_embedding_from_consumed_items = self.generateUserEmebddingFromConsumedItems(self.final_item_embedding)
 
-        #self.fusion_user_embedding = self.user_fusion_layer(\
+        # self.fusion_user_embedding = self.user_fusion_layer(\
         #    tf.compat.v1.concat([self.user_embedding, second_user_review_vector_matrix], 1))
         self.fusion_user_embedding = self.user_embedding + second_user_review_vector_matrix
         first_gcn_user_embedding = self.generateUserEmbeddingFromSocialNeighbors(self.fusion_user_embedding)
         second_gcn_user_embedding = self.generateUserEmbeddingFromSocialNeighbors(first_gcn_user_embedding)
-        
+
         # ORIGINAL OPERATION OF diffnet
-        #self.final_user_embedding = second_gcn_user_embedding + user_embedding_from_consumed_items
-        
+        # self.final_user_embedding = second_gcn_user_embedding + user_embedding_from_consumed_items
+
+        """最终的 user embedding 需要加上来自项目消费的嵌入"""
         # FOLLOWING OPERATION IS USED TO TACKLE THE GRAPH OVERSMOOTHING ISSUE, IF YOU WANT TO KNOW MORE DETAILS, PLEASE REFER TO https://github.com/newlei/LR-GCCF
         self.final_user_embedding = first_gcn_user_embedding + second_gcn_user_embedding + user_embedding_from_consumed_items
-        
+
+        """取出对应的 index 作为隐向量"""
         latest_user_latent = tf.compat.v1.gather_nd(self.final_user_embedding, self.user_input)
         latest_item_latent = tf.compat.v1.gather_nd(self.final_item_embedding, self.item_input)
-        
-        predict_vector = tf.compat.v1.multiply(latest_user_latent, latest_item_latent)
-        
-        self.prediction = tf.compat.v1.sigmoid(tf.compat.v1.reduce_sum(predict_vector, 1, keepdims=True))
-        #self.prediction = self.predict_rating_layer(tf.compat.v1.concat([latest_user_latent, latest_item_latent], 1))
 
+        predict_vector = tf.compat.v1.multiply(latest_user_latent, latest_item_latent)
+
+        """sigmoid 函数最终预测"""
+        self.prediction = tf.compat.v1.sigmoid(tf.compat.v1.reduce_sum(predict_vector, 1, keepdims=True))
+        # self.prediction = self.predict_rating_layer(tf.compat.v1.concat([latest_user_latent, latest_item_latent], 1))
+
+        """损失为预测值和标签之间的l2损失"""
         self.loss = tf.compat.v1.nn.l2_loss(self.labels_input - self.prediction)
 
         self.opt_loss = tf.compat.v1.nn.l2_loss(self.labels_input - self.prediction)
+        """优化器为Adam"""
         self.opt = tf.compat.v1.train.AdamOptimizer(self.conf.learning_rate).minimize(self.opt_loss)
         self.init = tf.compat.v1.global_variables_initializer()
 
+    """保存变量，创建一个变量字典，保存 user and item embedding， 使用 tf.saver 保存变量"""
     def saveVariables(self):
         ############################# Save Variables #################################
         variables_dict = {}
@@ -141,33 +170,33 @@ class diffnet():
 
         for v in self.reduce_dimension_layer.variables:
             variables_dict[v.op.name] = v
-                
+
         self.saver = tf.compat.v1.train.Saver(variables_dict)
         ############################# Save Variables #################################
 
-    # 定义 map 数据结构
+    """定义 map 数据结构，完成了输入映射"""
     def defineMap(self):
         map_dict = {}
         map_dict['train'] = {
-            self.user_input: 'USER_LIST', 
-            self.item_input: 'ITEM_LIST', 
+            self.user_input: 'USER_LIST',
+            self.item_input: 'ITEM_LIST',
             self.labels_input: 'LABEL_LIST'
         }
-        
+
         map_dict['val'] = {
-            self.user_input: 'USER_LIST', 
-            self.item_input: 'ITEM_LIST', 
+            self.user_input: 'USER_LIST',
+            self.item_input: 'ITEM_LIST',
             self.labels_input: 'LABEL_LIST'
         }
 
         map_dict['test'] = {
-            self.user_input: 'USER_LIST', 
-            self.item_input: 'ITEM_LIST', 
+            self.user_input: 'USER_LIST',
+            self.item_input: 'ITEM_LIST',
             self.labels_input: 'LABEL_LIST'
         }
 
         map_dict['eva'] = {
-            self.user_input: 'EVA_USER_LIST', 
+            self.user_input: 'EVA_USER_LIST',
             self.item_input: 'EVA_ITEM_LIST'
         }
 

@@ -12,7 +12,8 @@ import numpy as np
 import tensorflow._api.v2.compat.v1 as tf
 tf.disable_v2_behavior()
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' #ignore the warnings 
+#ignore the warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from Logging import Logging
 
@@ -63,7 +64,6 @@ def start(conf, data, model, evaluate):
         tmp_train_loss = []
         t0 = time()
 
-        #tmp_total_list = []
         while d_train.terminal_flag:
             d_train.getTrainRankingBatch()
             d_train.linkedMap()
