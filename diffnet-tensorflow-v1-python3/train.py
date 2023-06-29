@@ -8,7 +8,9 @@ import os, sys, shutil
 
 from time import time
 import numpy as np
-import tensorflow as tf
+
+import tensorflow._api.v2.compat.v1 as tf
+tf.disable_v2_behavior()
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' #ignore the warnings 
 

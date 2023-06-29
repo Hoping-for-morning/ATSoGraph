@@ -3,7 +3,12 @@
     e-mail: sun.hfut@gmail.com 
     released date: 04/18/2019
 '''
-import tensorflow as tf
+
+# 使用 tensorflow v1
+
+import tensorflow._api.v2.compat.v1 as tf
+tf.disable_v2_behavior()
+
 import numpy as np
 
 class diffnet():
@@ -139,7 +144,8 @@ class diffnet():
                 
         self.saver = tf.compat.v1.train.Saver(variables_dict)
         ############################# Save Variables #################################
-    
+
+    # 定义 map 数据结构
     def defineMap(self):
         map_dict = {}
         map_dict['train'] = {

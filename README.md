@@ -1,77 +1,61 @@
-# GraphRec-WWW19
+### ⭐UPDATE 20221220:
+*As the python 2.7 is deprecated, I have convert the diffnet code into a new one to make it can be used under python 3.x. If you use python 3.x, tensorflow-gpu-1.x, you can run the code in directory diffnet-tensorflow-v1-python3. I have tested the development environment python 3.7, and tensorflow-1.15.*
 
-## GraphRec: Graph Neural Networks for Social Recommendation
+### Basic Information:
+This code is released for the papers: 
 
-This is our implementation for the paper:
-
-[**<u>Wenqi Fan</u>**](https://wenqifan03.github.io), Yao Ma , Qing Li, Yuan He, Eric Zhao, Jiliang Tang, and Dawei Yin. [Graph Neural Networks for Social Recommendation](https://arxiv.org/pdf/1902.07243.pdf). 
-In Proceedings of the 28th International Conference on World Wide Web (WWW), 2019. 
-Preprint[https://arxiv.org/abs/1902.07243]
-
-
-## Abstract
-In recent years, Graph Neural Networks (GNNs), which can naturally integrate node information and topological structure, have been demonstrated to be powerful in learning on graph data. These advantages of GNNs provide great potential to ad- vance social recommendation since data in social recommender systems can be represented as user-user social graph and user-item graph; and learning latent factors of users and items is the key. However, building social recommender systems based on GNNs faces challenges. For example, the user-item graph encodes both interactions and their associated opinions; social relations have heterogeneous strengths; users involve in two graphs (e.g., the user-user social graph and the user-item graph). To address the three aforementioned challenges simultaneously, in this paper, we present a novel graph neural network framework (GraphRec) for social recommendations. In particular, we provide a principled approach to jointly capture interactions and opinions in the user-item graph and propose the framework GraphRec, which coherently models two graphs and heterogeneous strengths. Extensive experiments on two real-world datasets demonstrate the effectiveness of the proposed framework GraphRec.
+Le Wu, Peijie Sun, Yanjie Fu, Richang Hong, Xiting Wang and Meng Wang. A Neural Influence Diffusion Model for Social Recommendation. Accepted by SIGIR2019. [pdf](http://arxiv.org/abs/1904.10322).  
+Le Wu, Junwei Li, Peijie Sun, Richang Hong, Yong Ge, and Meng Wang. DiffNet++: A Neural Influence and Interest Diffusion Network for Social Recommendation. Accepted by IEEE Transactions on Knowledge and Data Engineering in Dec 2020. [pdf](https://arxiv.org/abs/2002.00844)
 
 
+### Usage:
+1. **Environment: If you use python2.7, tensorflow-gpu-1.12.0, you can run the code in directory diffnet-tensorflow-v1; if you use python 3.7, tensorflow-gpu-1.15, you can run the code in directory diffnet-tensorflow-v1-python3.**
+3. Run DiffNet: 
+   1. Download the yelp data from this [link](https://drive.google.com/drive/folders/1hIkRDIVI87CUM4xFGjHMeipOlPz97ThX?usp=sharing), and unzip the directories in yelp data to the sub-directory named diffnet of your local clone repository.
+   2. cd the sub-directory diffnet and execute the command `python entry.py --data_name=<data_name> --model_name=diffnet --gpu=<gpu id>` 
+4. Run DiffNet++:
+   1. Download datasets from this [link](https://drive.google.com/drive/folders/1YAJvgsCJLKDFPVFMX3OG7v3m1LAYZD5R?usp=sharing), and just put the downloaded folder 'data' in the sub-directory named diffnet++ of your local clone repository.
+   2. cd the sub-directory diffnet++ and execute the command `python entry.py --data_name=<data_name> --model_name=diffnetplus --gpu=<gpu id>` 
+5. If you have any available gpu device, you can specify the gpu id, or you can just ignore the gpu id. 
 
-## Introduction
- Graph Data in Social Recommendation. It contains two graphs including the user-item graph (left part) and the user-user social graph (right part). Note that the number on the edges of the user-item graph denotes the opinions (or rating score) of users on the items via the interactions.
-![ 123](intro.png "Social Recommendations")
+Following are the command examples:  
+`python entry.py --data_name=yelp --model_name=diffnet`  
+`python entry.py --data_name=yelp --model_name=diffnetplus`
 
-
-## Our Model GraphRec
-The overall architecture of the proposed model. It contains three major components: user modeling, item modeling, and rating prediction.The first component is user modeling, which is to learn latent factors of users. As data in social recommender systems includes two different graphs, i.e., a social graph and a user-item graph, we are provided with a great opportunity to learn user representations from different perspectives. Therefore, two aggregations are introduced to respectively process these two different graphs. One is item aggregation, which can be utilized to understand users via interactions between users and items in the user-item graph (or item-space). The other is social aggregation, the relationship between users in the social graph, which can help model users from the social perspective (or social-space). Then, it is intuitive to obtain user latent factors by combining information from both item space and social space. The second component is item modeling, which is to learn latent factors of items. In order to consider both interactions and opinions in the user-item graph, we introduce user aggregation, which is to aggregate users’ opinions in item modeling. The third component is to learn model parameters via prediction by integrating user and item modeling components.
-
-![ 123](GraphRec.png "GraphRec")
-
-
-## Code
-
-Author: Wenqi Fan (https://wenqifan03.github.io, email: wenqifan03@gmail.com) 
-
-Also, I would be more than happy to provide a detailed answer for any questions you may have regarding GraphRec.
-
-If you use this code, please cite our paper:
+### Citation:
 ```
-@inproceedings{fan2019graph,
-  title={Graph Neural Networks for Social Recommendation},
-  author={Fan, Wenqi and Ma, Yao and Li, Qing and He, Yuan and Zhao, Eric and Tang, Jiliang and Yin, Dawei},
-  booktitle={The World Wide Web Conference},
-  pages={417--426},
-  year={2019},
-  organization={ACM}
-}
-```
+The dataset flickr we use from this paper:
+ @article{HASC2019,
+  title={A Hierarchical Attention Model for Social Contextual Image Recommendation},
+  author={Le, Wu and Lei, Chen and Richang, Hong and Yanjie, Fu and Xing, Xie and Meng, Wang},
+  journal={IEEE Transactions on Knowledge and Data Engineering},
+  year={2019}
+ }
 
-## Environment Settings
-##### python: 3.6
-##### pytorch: 0.2+
+ The algorithm is from DiffNet and DiffNet++:
+ @inproceedings{DiffNet2019.
+ title={A Neural Influence Diffusion Model for Social Recommendation},
+ author={Le Wu, Peijie Sun, Yanjie Fu, Richang Hong, Xiting Wang and Meng Wang},
+ conference={42nd International ACM SIGIR Conference on Research and Development in Information Retrieval},
+ year={2019}
+ }
 
-## Example to run the codes
+ @article{wu2020diffnet++,
+  title={DiffNet++: A Neural Influence and Interest Diffusion Network for Social Recommendation},
+  author={Wu, Le and Li, Junwei and Sun, Peijie and Ge, Yong and Wang, Meng},
+  journal={arXiv preprint arXiv:2002.00844},
+  year={2020}
+ }
+ 
+ We utilized the key technique in following paper to tackle the graph oversmoothing issue, and we have annotated
+ the change in line 114 in diffnet/diffnet.py, if you want to konw more details, please refer to:
+ @inproceedings{
+ title={Revisiting Graph based Collaborative Filtering: A Linear Residual Graph Convolutional Network Approach},
+ author={Lei Chen, Le Wu, Richang Hong, Kun Zhang, Meng Wang},
+ conference={The 34th AAAI Conference on Artificial Intelligence (AAAI 2020)},
+ year={2020}
+ }
+ ```
 
-Run GraphRec:
-```
-python run_GraphRec_example.py
-```
-
-Raw Datasets (Ciao and Epinions)  can be downloaded at [http://www.cse.msu.edu/~tangjili/trust.html](http://www.cse.msu.edu/~tangjili/trust.html)
-
-## Deep Neural Networks for Social Recommendations
-
-*  **<u>Wenqi Fan</u>**, Yao Ma , Qing Li, Jianping Wang, Guoyong Cai, Jiliang Tang, and Dawei Yin. **A Graph Neural Network Framework for Social Recommendations.** To appear in IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING (IEEE TKDE), 2020.
-
-* **<u>Wenqi Fan</u>**, Yao Ma, Dawei Yin, Jianping Wang, Jiliang Tang, Qing Li.
-  **Deep Social Collaborative Filtering.** In Proceedings of the 13th ACM Conference on Recommender Systems (RecSys 2019), 2019. (Long Paper,  Acceptance rate: 19%.) [[Arxiv](https://arxiv.org/abs/1907.06853)]    
-
-* **<u>Wenqi Fan</u>**, Tyler Derr, Yao Ma, Jianping Wang, Jiliang Tang, Qing Li.
-  **Deep Adversarial Social Recommendation.**  In Proceedings of the International Joint Conference on Artificial Intelligence (IJCAI), 2019. [[Arxiv](https://arxiv.org/abs/1905.13160)]   [[Slides](https://drive.google.com/file/d/1lCvxGlkBm6ux3KderXlE0YE9ELSHlfbh/view?usp=sharing)]
-
-* **<u>Wenqi Fan</u>**, Qing Li, Min Cheng. **Deep Modeling of Social Relations for Recommendation.**  In Proceedings of the Thirty-Second AAAI Conference on Artificial Intelligence. 2018. (Student Poster.)  [[PDF](https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPaper/16075)]
-
-
-
-# Acknowledgements
-The original version of this code base was from GraphSage. We owe many thanks to William L. Hamilton for making his code available. 
-Please see the paper for funding details and additional (non-code related) acknowledgements.
-
-Last Update Date: Oct, 2019
+### Author contact:
+Email: sun.hfut@gmail.com, lijunwei.edu@gmail.com
