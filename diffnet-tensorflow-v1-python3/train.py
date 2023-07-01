@@ -97,6 +97,7 @@ def start(conf, data, model, evaluate):
 
         """性能评估使用 HR 命中率，NDCG(normalized discounted cumulative gain) 归一化折损累计增益"""
         # start evaluate model performance, hr and ndcg
+        """获取正样本"""
         def getPositivePredictions():
             d_test_eva.getEvaPositiveBatch()
             d_test_eva.linkedRankingEvaMap()
@@ -138,6 +139,7 @@ def start(conf, data, model, evaluate):
         negative_predictions = getNegativePredictions()
 
         d_test_eva.index = 0 # !!!important, prepare for new batch
+        """评估"""
         hr, ndcg = evaluate.evaluateRankingPerformance(\
             index_dict, positive_predictions, negative_predictions, conf.topk, conf.num_procs)
         tt3 = time()

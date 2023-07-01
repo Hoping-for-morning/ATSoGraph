@@ -104,6 +104,7 @@ class diffnet():
             self.conf.dimension, activation=tf.compat.v1.nn.sigmoid, name='user_fusion_layer')
 
     """构造训练图"""
+
     def constructTrainGraph(self):
         """
         嵌入降维
@@ -119,42 +120,26 @@ class diffnet():
         second_user_review_vector_matrix = self.convertDistribution(self.user_reduce_dim_vector_matrix)
         second_item_review_vector_matrix = self.convertDistribution(self.item_reduce_dim_vector_matrix)
 
+        # todo 应该在 embedding 之后构造 perturbation
+        """---------------------------------Add adversarial training---------------------------------------"""
+        """ 加入扰动 in fusion embedding """
+
         """项目嵌入是通过将 item embedding 和 item_review_vector_matrix 进行融合来计算的"""
         # compute item embedding
         # self.fusion_item_embedding = self.item_fusion_layer(\
         #   tf.compat.v1.concat([self.item_embedding, second_item_review_vector_matrix], 1))
-
-        # fusion item embedding
-        self.fusion_item_embedding = self.item_embedding + second_item_review_vector_matrix
-        self.final_item_embedding = self.fusion_item_embedding
+        self.final_item_embedding = self.fusion_item_embedding \
+            = self.item_embedding + second_item_review_vector_matrix
         # self.final_item_embedding = self.fusion_item_embedding = second_item_review_vector_matrix
 
-        # fusion user embedding
+        """计算 user embedding"""
+        # compute user embedding
+        """history consume item embedding"""
+        user_embedding_from_consumed_items = self.generateUserEmebddingFromConsumedItems(self.final_item_embedding)
+
         # self.fusion_user_embedding = self.user_fusion_layer(\
         #    tf.compat.v1.concat([self.user_embedding, second_user_review_vector_matrix], 1))
         self.fusion_user_embedding = self.user_embedding + second_user_review_vector_matrix
-
-        """---------------------------------Add adversarial training---------------------------------------"""
-        """ 应该在 embedding 之后构造 perturbation """
-        """ PGD 方法加入扰动 in fusion embedding """
-        # generate the adversarial weights by gradient-based method
-        # return the IndexedSlice Data: [(values, indices, dense_shape)]
-        # grad_var_P: [grad,var], grad_var_Q: [grad, var]
-        # grad_P : for user
-        # grad_Q : for item
-        self.grad_P, self.grad_Q = tf.gradients(self.loss, [self.fusion_user_embedding, self.fusion_item_embedding])
-
-        # convert the IndexedSlice Data to Dense Tensor
-        self.grad_P_dense = tf.stop_gradient(self.grad_P)
-        self.grad_Q_dense = tf.stop_gradient(self.grad_Q)
-
-        # normalization: new_grad = (grad / |grad|) * eps
-        self.update_P = self.delta_P.assign(tf.nn.l2_normalize(self.grad_P_dense, 1) * self.eps)
-        self.update_Q = self.delta_Q.assign(tf.nn.l2_normalize(self.grad_Q_dense, 1) * self.eps)
-
-        # testing
-        self.fusion_user_embedding = self.update_P
-        self.fusion_item_embedding = self.update_Q
 
         """两层图卷积"""
         first_gcn_user_embedding = self.generateUserEmbeddingFromSocialNeighbors(self.fusion_user_embedding)
@@ -164,9 +149,6 @@ class diffnet():
         # self.final_user_embedding = second_gcn_user_embedding + user_embedding_from_consumed_items
 
         """最终的 user embedding 需要加上来自项目消费的嵌入"""
-        #history consume item embedding
-        user_embedding_from_consumed_items = self.generateUserEmebddingFromConsumedItems(self.final_item_embedding)
-
         # FOLLOWING OPERATION IS USED TO TACKLE THE GRAPH OVERSMOOTHING ISSUE, IF YOU WANT TO KNOW MORE DETAILS, PLEASE REFER TO https://github.com/newlei/LR-GCCF
         self.final_user_embedding = first_gcn_user_embedding + second_gcn_user_embedding + user_embedding_from_consumed_items
 
@@ -190,7 +172,6 @@ class diffnet():
         self.init = tf.compat.v1.global_variables_initializer()
 
     """保存变量，创建一个变量字典，保存 user and item embedding， 使用 tf.saver 保存变量"""
-
     def saveVariables(self):
         ############################# Save Variables #################################
         variables_dict = {}
@@ -204,7 +185,6 @@ class diffnet():
         ############################# Save Variables #################################
 
     """定义 map 数据结构，完成了输入映射"""
-
     def defineMap(self):
         map_dict = {}
         map_dict['train'] = {
