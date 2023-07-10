@@ -64,7 +64,6 @@ def start(conf, data, model, evaluate):
         tmp_train_loss = []
         t0 = time()
 
-        """退出训练, 测试一下"""
         while d_train.terminal_flag:
             d_train.getTrainRankingBatch()
             d_train.linkedMap()

@@ -326,10 +326,10 @@ class diffnet():
         }
 
         map_dict['out'] = {
-            'train': self.loss,
-            'val': self.loss,
-            'test': self.loss,
-            'eva': self.prediction
+            'train': self.opt_loss,
+            'val': self.opt_loss,
+            'test': self.opt_loss,
+            'eva': self.prediction_adv
         }
 
         self.map_dict = map_dict
