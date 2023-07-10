@@ -262,8 +262,8 @@ class diffnet():
         # grad_i : for item
         """random"""
         # generation
-        self.adv_P = tf.truncated_normal(shape=[self.num_users, self.embedding_size], mean=0.0, stddev=0.01)
-        self.adv_Q = tf.truncated_normal(shape=[self.num_items, self.embedding_size], mean=0.0, stddev=0.01)
+        self.adv_P = tf.truncated_normal(shape=[self.conf.num_users, self.conf.dimension], mean=0.0, stddev=0.01)
+        self.adv_Q = tf.truncated_normal(shape=[self.conf.num_items, self.conf.dimension], mean=0.0, stddev=0.01)
 
         # normalization and multiply epsilon
         self.update_u = self.delta_u.assign(tf.nn.l2_normalize(self.adv_P, 1) * self.eps)
