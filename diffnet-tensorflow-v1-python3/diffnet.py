@@ -251,8 +251,6 @@ class diffnet():
         """优化器为Adam"""
         self.opt = tf.compat.v1.train.AdamOptimizer(self.conf.learning_rate).minimize(self.opt_loss)
 
-
-
     def createAdversarial(self):
         """---------------------------------Add adversarial training---------------------------------------"""
         """ 应该在 embedding 之后构造 perturbation """
@@ -263,7 +261,7 @@ class diffnet():
         # grad_u : for user
         # grad_i : for item
         self.grad_u, self.grad_i = tf.compat.v1.gradients(self.loss,
-                                                          [self.fusion_user_embedding, self.fusion_item_embedding])
+                                                          [self.fusion_user_embedding, self.final_item_embedding])
 
         # convert the IndexedSlice Data to Dense Tensor
         self.grad_u_dense = tf.compat.v1.stop_gradient(self.grad_u)
