@@ -142,8 +142,6 @@ class diffnet():
         # self.final_item_embedding = self.fusion_item_embedding = second_item_review_vector_matrix
 
         # fusion user embedding
-        # self.fusion_user_embedding = self.user_fusion_layer(\
-        #    tf.compat.v1.concat([self.user_embedding, second_user_review_vector_matrix], 1))
         self.fusion_user_embedding = self.user_embedding + second_user_review_vector_matrix
 
         """两层图卷积"""
