@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af377f16-5eee-4d04-ae58-a7c190251589" name="Changes" comment="diffnet based on gcn FC recommendation system">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3/diffnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3/diffnet.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -142,7 +141,7 @@
       <workItem from="1688041667678" duration="11000" />
       <workItem from="1688041700877" duration="14110000" />
       <workItem from="1688875857310" duration="2314000" />
-      <workItem from="1688967554714" duration="13012000" />
+      <workItem from="1688967554714" duration="13390000" />
     </task>
     <task id="LOCAL-00001" summary="GCN core function in numpy">
       <created>1687095780238</created>

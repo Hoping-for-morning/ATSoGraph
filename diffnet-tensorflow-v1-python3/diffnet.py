@@ -260,16 +260,27 @@ class diffnet():
         # grad_var_P: [grad,var], grad_var_Q: [grad, var]
         # grad_u : for user
         # grad_i : for item
-        self.grad_u, self.grad_i = tf.compat.v1.gradients(self.loss,
-                                                          [self.fusion_user_embedding, self.final_item_embedding])
+        """random"""
+        # generation
+        self.adv_P = tf.truncated_normal(shape=[self.num_users, self.embedding_size], mean=0.0, stddev=0.01)
+        self.adv_Q = tf.truncated_normal(shape=[self.num_items, self.embedding_size], mean=0.0, stddev=0.01)
 
-        # convert the IndexedSlice Data to Dense Tensor
-        self.grad_u_dense = tf.compat.v1.stop_gradient(self.grad_u)
-        self.grad_i_dense = tf.compat.v1.stop_gradient(self.grad_i)
+        # normalization and multiply epsilon
+        self.update_u = self.delta_u.assign(tf.nn.l2_normalize(self.adv_P, 1) * self.eps)
+        self.update_i = self.delta_i.assign(tf.nn.l2_normalize(self.adv_Q, 1) * self.eps)
 
-        # normalization: new_grad = (grad / |grad|) * eps
-        self.update_u = self.delta_u.assign(tf.nn.l2_normalize(self.grad_u_dense, 1) * self.eps)
-        self.update_i = self.delta_i.assign(tf.nn.l2_normalize(self.grad_i_dense, 1) * self.eps)
+
+        """grad"""
+        # self.grad_u, self.grad_i = tf.compat.v1.gradients(self.loss,
+        #                                                   [self.fusion_user_embedding, self.final_item_embedding])
+        #
+        # # convert the IndexedSlice Data to Dense Tensor
+        # self.grad_u_dense = tf.compat.v1.stop_gradient(self.grad_u)
+        # self.grad_i_dense = tf.compat.v1.stop_gradient(self.grad_i)
+        #
+        # # normalization: new_grad = (grad / |grad|) * eps
+        # self.update_u = self.delta_u.assign(tf.nn.l2_normalize(self.grad_u_dense, 1) * self.eps)
+        # self.update_i = self.delta_i.assign(tf.nn.l2_normalize(self.grad_i_dense, 1) * self.eps)
 
 
 
