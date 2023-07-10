@@ -96,11 +96,11 @@ class diffnet():
         # perturbation variables
         # user
         self.delta_u = tf.compat.v1.Variable(
-            tf.compat.v1.zeros(shape=[self.conf.num_users, self.conf.dimension], name='delta_u', trainable=False)
+            tf.compat.v1.zeros(shape=[self.conf.num_users, self.conf.dimension], name='delta_u')
         )
         # item
         self.delta_i = tf.compat.v1.Variable(
-            tf.compat.v1.zeros(shape=[self.conf.num_items, self.conf.dimension], name='delta_i', trainable=False)
+            tf.compat.v1.zeros(shape=[self.conf.num_items, self.conf.dimension], name='delta_i')
         )
 
         self.user_review_vector_matrix = tf.compat.v1.constant( \
