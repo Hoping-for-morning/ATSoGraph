@@ -114,6 +114,7 @@ class diffnet():
             self.conf.dimension, activation=tf.compat.v1.nn.sigmoid, name='item_fusion_layer')
         self.user_fusion_layer = tf.compat.v1.layers.Dense( \
             self.conf.dimension, activation=tf.compat.v1.nn.sigmoid, name='user_fusion_layer')
+        self.init = tf.compat.v1.global_variables_initializer()
 
     """构造训练图"""
     def createInference(self):
@@ -250,7 +251,7 @@ class diffnet():
         """优化器为Adam"""
         self.opt = tf.compat.v1.train.AdamOptimizer(self.conf.learning_rate).minimize(self.opt_loss)
 
-        self.init = tf.compat.v1.global_variables_initializer()
+
 
     def createAdversarial(self):
         """---------------------------------Add adversarial training---------------------------------------"""
