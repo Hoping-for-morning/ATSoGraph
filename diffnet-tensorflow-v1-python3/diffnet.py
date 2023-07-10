@@ -243,7 +243,7 @@ class diffnet():
         self.loss = tf.compat.v1.nn.l2_loss(self.labels_input - self.prediction)
 
         # loss for adv
-        self.prediction_adv = self.createInference()
+        self.prediction_adv = self.createInference_adv()
         self.loss_adv = tf.compat.v1.nn.l2_loss(self.labels_input - self.prediction_adv)
 
         self.opt_loss = self.loss + self.loss_adv
