@@ -18,7 +18,9 @@ class diffnet():
 
     def startConstructGraph(self):
         self.initializeNodes()
-        self.constructTrainGraph()
+        self.createLoss()
+        self.createOptimizer()
+        self.createAdversarial()
         self.saveVariables()
         self.defineMap()
 
@@ -91,6 +93,16 @@ class diffnet():
         self.item_embedding = tf.compat.v1.Variable(
             tf.compat.v1.random_normal([self.conf.num_items, self.conf.dimension], stddev=0.01), name='item_embedding')
 
+        # perturbation variables
+        # user
+        self.delta_u = tf.compat.v1.Variable(
+            tf.compat.v1.zeros(shape=[self.conf.num_users, self.conf.dimension], name='delta_u', trainable=False)
+        )
+        # item
+        self.delta_i = tf.compat.v1.Variable(
+            tf.compat.v1.zeros(shape=[self.conf.num_items, self.conf.dimension], name='delta_i', trainable=False)
+        )
+
         self.user_review_vector_matrix = tf.compat.v1.constant( \
             np.load(self.conf.user_review_vector_matrix), dtype=tf.compat.v1.float32)
         self.item_review_vector_matrix = tf.compat.v1.constant( \
@@ -104,12 +116,12 @@ class diffnet():
             self.conf.dimension, activation=tf.compat.v1.nn.sigmoid, name='user_fusion_layer')
 
     """构造训练图"""
-    def constructTrainGraph(self):
+    def createInference(self):
         """
         嵌入降维
         通过转换分布，降维的方式，映射原来的 review matrix
         """
-        # handle review information, map the origin review into the new space and 
+        # handle review information, map the origin review into the new space and
         first_user_review_vector_matrix = self.convertDistribution(self.user_review_vector_matrix)
         first_item_review_vector_matrix = self.convertDistribution(self.item_review_vector_matrix)
 
@@ -134,28 +146,6 @@ class diffnet():
         #    tf.compat.v1.concat([self.user_embedding, second_user_review_vector_matrix], 1))
         self.fusion_user_embedding = self.user_embedding + second_user_review_vector_matrix
 
-        """---------------------------------Add adversarial training---------------------------------------"""
-        """ 应该在 embedding 之后构造 perturbation """
-        """ PGD 方法加入扰动 in fusion embedding """
-        # generate the adversarial weights by gradient-based method
-        # return the IndexedSlice Data: [(values, indices, dense_shape)]
-        # grad_var_P: [grad,var], grad_var_Q: [grad, var]
-        # grad_P : for user
-        # grad_Q : for item
-        self.grad_P, self.grad_Q = tf.gradients(self.loss, [self.fusion_user_embedding, self.fusion_item_embedding])
-
-        # convert the IndexedSlice Data to Dense Tensor
-        self.grad_P_dense = tf.stop_gradient(self.grad_P)
-        self.grad_Q_dense = tf.stop_gradient(self.grad_Q)
-
-        # normalization: new_grad = (grad / |grad|) * eps
-        self.update_P = self.delta_P.assign(tf.nn.l2_normalize(self.grad_P_dense, 1) * self.eps)
-        self.update_Q = self.delta_Q.assign(tf.nn.l2_normalize(self.grad_Q_dense, 1) * self.eps)
-
-        # testing
-        self.fusion_user_embedding = self.update_P
-        self.fusion_item_embedding = self.update_Q
-
         """两层图卷积"""
         first_gcn_user_embedding = self.generateUserEmbeddingFromSocialNeighbors(self.fusion_user_embedding)
         second_gcn_user_embedding = self.generateUserEmbeddingFromSocialNeighbors(first_gcn_user_embedding)
@@ -177,17 +167,114 @@ class diffnet():
         predict_vector = tf.compat.v1.multiply(latest_user_latent, latest_item_latent)
 
         """sigmoid 函数最终预测"""
-        self.prediction = tf.compat.v1.sigmoid(tf.compat.v1.reduce_sum(predict_vector, 1, keepdims=True))
+        return tf.compat.v1.sigmoid(tf.compat.v1.reduce_sum(predict_vector, 1, keepdims=True))
         # self.prediction = self.predict_rating_layer(tf.compat.v1.concat([latest_user_latent, latest_item_latent], 1))
 
+    def createInference_adv(self):
+        """
+        嵌入降维
+        通过转换分布，降维的方式，映射原来的 review matrix
+        """
+        # handle review information, map the origin review into the new space and
+        first_user_review_vector_matrix = self.convertDistribution(self.user_review_vector_matrix)
+        first_item_review_vector_matrix = self.convertDistribution(self.item_review_vector_matrix)
+
+        self.user_reduce_dim_vector_matrix = self.reduce_dimension_layer(first_user_review_vector_matrix)
+        self.item_reduce_dim_vector_matrix = self.reduce_dimension_layer(first_item_review_vector_matrix)
+
+        second_user_review_vector_matrix = self.convertDistribution(self.user_reduce_dim_vector_matrix)
+        second_item_review_vector_matrix = self.convertDistribution(self.item_reduce_dim_vector_matrix)
+
+        """项目嵌入是通过将 item embedding 和 item_review_vector_matrix 进行融合来计算的"""
+        # compute item embedding
+        # self.fusion_item_embedding = self.item_fusion_layer(\
+        #   tf.compat.v1.concat([self.item_embedding, second_item_review_vector_matrix], 1))
+
+        # fusion item embedding
+        self.fusion_item_embedding = self.item_embedding + second_item_review_vector_matrix
+        self.final_item_embedding = self.fusion_item_embedding
+        # self.final_item_embedding = self.fusion_item_embedding = second_item_review_vector_matrix
+
+        # fusion user embedding
+        # self.fusion_user_embedding = self.user_fusion_layer(\
+        #    tf.compat.v1.concat([self.user_embedding, second_user_review_vector_matrix], 1))
+        self.fusion_user_embedding = self.user_embedding + second_user_review_vector_matrix
+
+        """ 引入干扰，这里很关键，可能会有问题 """
+        """ 等下把公式补上 """
+        # add adversrial noise
+        # user
+        self.fusion_user_embedding = self.fusion_user_embedding \
+                                     + tf.compat.v1.reduce_sum(
+            tf.compat.v1.gather_nd(self.delta_i, self.user_input))
+        # item
+        self.final_item_embedding = self.final_item_embedding \
+                                    + tf.compat.v1.reduce_sum(
+            tf.compat.v1.gather_nd(self.delta_i, self.item_input))
+
+        """两层图卷积"""
+        first_gcn_user_embedding = self.generateUserEmbeddingFromSocialNeighbors(self.fusion_user_embedding)
+        second_gcn_user_embedding = self.generateUserEmbeddingFromSocialNeighbors(first_gcn_user_embedding)
+
+        # ORIGINAL OPERATION OF diffnet
+        # self.final_user_embedding = second_gcn_user_embedding + user_embedding_from_consumed_items
+
+        """最终的 user embedding 需要加上来自项目消费的嵌入"""
+        # history consume item embedding
+        user_embedding_from_consumed_items = self.generateUserEmebddingFromConsumedItems(self.final_item_embedding)
+
+        # FOLLOWING OPERATION IS USED TO TACKLE THE GRAPH OVERSMOOTHING ISSUE, IF YOU WANT TO KNOW MORE DETAILS, PLEASE REFER TO https://github.com/newlei/LR-GCCF
+        self.final_user_embedding = first_gcn_user_embedding + second_gcn_user_embedding + user_embedding_from_consumed_items
+
+        """取出对应的 index 作为隐向量"""
+        latest_user_latent = tf.compat.v1.gather_nd(self.final_user_embedding, self.user_input)
+        latest_item_latent = tf.compat.v1.gather_nd(self.final_item_embedding, self.item_input)
+
+        predict_vector = tf.compat.v1.multiply(latest_user_latent, latest_item_latent)
+
+        """sigmoid 函数最终预测"""
+        return tf.compat.v1.sigmoid(tf.compat.v1.reduce_sum(predict_vector, 1, keepdims=True))
+        # self.prediction = self.predict_rating_layer(tf.compat.v1.concat([latest_user_latent, latest_item_latent], 1))
+
+    def createLoss(self):
         """损失为预测值和标签之间的l2损失"""
-        # todo if adv loss 函数需要改变
+        # loss for L(Theta)
+        self.prediction = self.createInference()
         self.loss = tf.compat.v1.nn.l2_loss(self.labels_input - self.prediction)
 
-        self.opt_loss = tf.compat.v1.nn.l2_loss(self.labels_input - self.prediction)
+        # loss for adv
+        self.prediction_adv = self.createInference()
+        self.loss_adv = tf.compat.v1.nn.l2_loss(self.labels_input - self.prediction_adv)
+
+        self.opt_loss = self.loss + self.loss_adv
+
+    def createOptimizer(self):
         """优化器为Adam"""
         self.opt = tf.compat.v1.train.AdamOptimizer(self.conf.learning_rate).minimize(self.opt_loss)
+
         self.init = tf.compat.v1.global_variables_initializer()
+
+    def createAdversarial(self):
+        """---------------------------------Add adversarial training---------------------------------------"""
+        """ 应该在 embedding 之后构造 perturbation """
+        """ PGD 方法加入扰动 in fusion embedding """
+        # generate the adversarial weights by gradient-based method
+        # return the IndexedSlice Data: [(values, indices, dense_shape)]
+        # grad_var_P: [grad,var], grad_var_Q: [grad, var]
+        # grad_u : for user
+        # grad_i : for item
+        self.grad_u, self.grad_i = tf.compat.v1.gradients(self.loss,
+                                                          [self.fusion_user_embedding, self.fusion_item_embedding])
+
+        # convert the IndexedSlice Data to Dense Tensor
+        self.grad_u_dense = tf.compat.v1.stop_gradient(self.grad_u)
+        self.grad_i_dense = tf.compat.v1.stop_gradient(self.grad_i)
+
+        # normalization: new_grad = (grad / |grad|) * eps
+        self.update_u = self.delta_u.assign(tf.nn.l2_normalize(self.grad_u_dense, 1) * self.eps)
+        self.update_i = self.delta_i.assign(tf.nn.l2_normalize(self.grad_i_dense, 1) * self.eps)
+
+
 
     """保存变量，创建一个变量字典，保存 user and item embedding， 使用 tf.saver 保存变量"""
 
