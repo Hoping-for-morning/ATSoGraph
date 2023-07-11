@@ -266,8 +266,9 @@ class diffnet():
         self.adv_Q = tf.truncated_normal(shape=[self.conf.num_items, self.conf.dimension], mean=0.0, stddev=0.01)
 
         # normalization and multiply epsilon
-        self.update_u = self.delta_u.assign(tf.nn.l2_normalize(self.adv_P, 1) * self.eps)
-        self.update_i = self.delta_i.assign(tf.nn.l2_normalize(self.adv_Q, 1) * self.eps)
+        # epsilon = 0.5
+        self.update_u = self.delta_u.assign(tf.nn.l2_normalize(self.adv_P, 1) * 0.5)
+        self.update_i = self.delta_i.assign(tf.nn.l2_normalize(self.adv_Q, 1) * 0.5)
 
 
         """grad"""
