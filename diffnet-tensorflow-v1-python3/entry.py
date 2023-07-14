@@ -33,10 +33,6 @@ def executeTrainModel(config_path, model_name):
     starter.start(conf, data, model, evaluate)
 
 if __name__ == "__main__":
-    '''设定参数'''
-    # data name
-    # model name
-    # gpu name
     parser = argparse.ArgumentParser(description='Welcome to the Experiment Platform Entry')
     parser.add_argument('--data_name', nargs='?', help='data name')
     parser.add_argument('--model_name', nargs='?', help='model name')
@@ -47,8 +43,7 @@ if __name__ == "__main__":
     data_name = args.data_name
     model_name = args.model_name
     device_id = args.gpu
-
-    # setting cuda
+    
     if args.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = device_id
     config_path = os.path.join(os.getcwd(), 'conf/%s_%s.ini' % (data_name, model_name))

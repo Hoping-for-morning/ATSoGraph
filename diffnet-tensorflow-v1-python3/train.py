@@ -8,12 +8,9 @@ import os, sys, shutil
 
 from time import time
 import numpy as np
+import tensorflow as tf
 
-import tensorflow._api.v2.compat.v1 as tf
-tf.disable_v2_behavior()
-
-#ignore the warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' #ignore the warnings 
 
 from Logging import Logging
 
@@ -64,6 +61,7 @@ def start(conf, data, model, evaluate):
         tmp_train_loss = []
         t0 = time()
 
+        #tmp_total_list = []
         while d_train.terminal_flag:
             d_train.getTrainRankingBatch()
             d_train.linkedMap()
@@ -94,9 +92,7 @@ def start(conf, data, model, evaluate):
         test_loss = sess.run(model.map_dict['out']['test'], feed_dict=test_feed_dict)
         t2 = time()
 
-        """性能评估使用 HR 命中率，NDCG(normalized discounted cumulative gain) 归一化折损累计增益"""
         # start evaluate model performance, hr and ndcg
-        """获取正样本"""
         def getPositivePredictions():
             d_test_eva.getEvaPositiveBatch()
             d_test_eva.linkedRankingEvaMap()
@@ -109,7 +105,6 @@ def start(conf, data, model, evaluate):
             )
             return positive_predictions
 
-        """每个 epoch 训练之后，为训练数据生成负样本，以更新模型并提高性能"""
         def getNegativePredictions():
             negative_predictions = {}
             terminal_flag = 1
@@ -138,7 +133,6 @@ def start(conf, data, model, evaluate):
         negative_predictions = getNegativePredictions()
 
         d_test_eva.index = 0 # !!!important, prepare for new batch
-        """评估"""
         hr, ndcg = evaluate.evaluateRankingPerformance(\
             index_dict, positive_predictions, negative_predictions, conf.topk, conf.num_procs)
         tt3 = time()
