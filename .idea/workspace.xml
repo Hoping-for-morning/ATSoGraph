@@ -2,9 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af377f16-5eee-4d04-ae58-a7c190251589" name="Changes" comment="diffnet based on gcn FC recommendation system">
+      <change afterPath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3-AT/log/2023-07-14_16_/yelp_log_embed_size64_2023_07_14_16_56_36" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3-AT/log/2023-07-14_16_/yelp_log_embed_size64_2023_07_14_16_58_58" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_copy.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adversarial_personalized_ranking-master/AMF.py" beforeDir="false" afterPath="$PROJECT_DIR$/adversarial_personalized_ranking-master/AMF.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adversarial_personalized_ranking-master/Dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/adversarial_personalized_ranking-master/Dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3-AT/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/diffnet-tensorflow-v1-python3-AT/train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,22 +34,23 @@
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/hopeofmorning/Documents/Summer term paper/ATSoGraph/diffnet-tensorflow-v1-python3-AT&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Users/hopeofmorning/Documents/Summer term paper/ATSoGraph",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/diffnet-tensorflow-v1-python3-AT" />
       <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/diffnet-tensorflow-v1-python3-AT" />
       <recent name="$PROJECT_DIR$/diffnet-tensorflow-v1-python3" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -134,7 +138,7 @@
       <workItem from="1689139614039" duration="22092000" />
       <workItem from="1689175654657" duration="13165000" />
       <workItem from="1689256306894" duration="8519000" />
-      <workItem from="1689318084218" duration="1082000" />
+      <workItem from="1689318084218" duration="5976000" />
     </task>
     <task id="LOCAL-00001" summary="GCN core function in numpy">
       <created>1687095780238</created>
